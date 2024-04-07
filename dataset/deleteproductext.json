@@ -1,0 +1,19 @@
+{
+	"name": "deleteproductext",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "produ*.csv",
+				"folderPath": "data-ext-landing/product",
+				"fileSystem": "synapsecontainer1"
+			}
+		}
+	}
+}
