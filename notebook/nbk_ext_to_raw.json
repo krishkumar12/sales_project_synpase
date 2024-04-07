@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "27e13a96-9bfa-4b28-8873-921a3d05a0bf"
+				"spark.autotune.trackingId": "9ddf879e-56e5-424d-adb1-8985e93cda29"
 			}
 		},
 		"metadata": {
@@ -81,7 +81,7 @@
 					}
 				},
 				"source": [
-					"dfcustomer.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv')"
+					"dfcustomer.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv',mode='overwrite')"
 				],
 				"execution_count": 60
 			},
@@ -121,7 +121,7 @@
 					}
 				},
 				"source": [
-					"dfproduct.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products.csv')"
+					"dfproduct.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products.csv',mode='overwrite')"
 				],
 				"execution_count": 62
 			},
@@ -161,7 +161,7 @@
 					}
 				},
 				"source": [
-					"dfsales.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales.csv')"
+					"dfsales.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales.csv',mode='overwrite')"
 				],
 				"execution_count": 64
 			},
