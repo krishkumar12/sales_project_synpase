@@ -123,6 +123,74 @@
 								"enablePartitionDiscovery": false
 							}
 						}
+					},
+					{
+						"name": "deleteproductext",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "deletecustomerext",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "deleteproductext",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"wildcardFileName": "product*.csv",
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "deletesalesext",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "deleteproductext",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "deletesalesext",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"wildcardFileName": "sale*.csv",
+								"enablePartitionDiscovery": false
+							}
+						}
 					}
 				],
 				"policy": {
@@ -133,7 +201,9 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/notebooks/nbk_ext_to_raw')]",
 				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool1')]",
-				"[concat(variables('workspaceId'), '/datasets/deletecustomerext')]"
+				"[concat(variables('workspaceId'), '/datasets/deletecustomerext')]",
+				"[concat(variables('workspaceId'), '/datasets/deleteproductext')]",
+				"[concat(variables('workspaceId'), '/datasets/deletesalesext')]"
 			]
 		},
 		{
