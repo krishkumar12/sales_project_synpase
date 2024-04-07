@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "350cba5c-84e5-4ffc-9ac4-150f8f18f2f0"
+				"spark.autotune.trackingId": "7906c2bd-f45f-48cb-a2cf-3558b2a6fd4a"
 			}
 		},
 		"metadata": {
@@ -58,14 +58,50 @@
 				},
 				"source": [
 					"%%pyspark\r\n",
-					" \r\n",
+					"##Read customer data \r\n",
 					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/customer/customers.csv', format='csv'\r\n",
 					"## If header exists uncomment line below\r\n",
 					"##, header=True\r\n",
 					",header=True)\r\n",
-					"display(dfcustomer.limit(10))"
+					"#display(dfcustomer.limit(10))"
 				],
-				"execution_count": 14
+				"execution_count": 42
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfcustomer.write.csv('')"
+				],
+				"execution_count": 44
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"help(dataframe.write)"
+				],
+				"execution_count": 47
 			},
 			{
 				"cell_type": "code",
