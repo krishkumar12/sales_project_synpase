@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "7906c2bd-f45f-48cb-a2cf-3558b2a6fd4a"
+				"spark.autotune.trackingId": "27e13a96-9bfa-4b28-8873-921a3d05a0bf"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					",header=True)\r\n",
 					"#display(dfcustomer.limit(10))"
 				],
-				"execution_count": 42
+				"execution_count": 59
 			},
 			{
 				"cell_type": "code",
@@ -81,9 +81,9 @@
 					}
 				},
 				"source": [
-					"dfcustomer.write.csv('')"
+					"dfcustomer.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv')"
 				],
-				"execution_count": 44
+				"execution_count": 60
 			},
 			{
 				"cell_type": "code",
@@ -99,9 +99,13 @@
 					}
 				},
 				"source": [
-					"help(dataframe.write)"
+					" \r\n",
+					"##Read product  data \r\n",
+					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/product/products.csv', format='csv'\r\n",
+					",header=True)\r\n",
+					"#display(dfcustomer.limit(10))"
 				],
-				"execution_count": 47
+				"execution_count": 61
 			},
 			{
 				"cell_type": "code",
@@ -117,9 +121,9 @@
 					}
 				},
 				"source": [
-					"dfcustomer = dfcustomer.fillna('Unknown')"
+					"dfproduct.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products.csv')"
 				],
-				"execution_count": 25
+				"execution_count": 62
 			},
 			{
 				"cell_type": "code",
@@ -135,9 +139,13 @@
 					}
 				},
 				"source": [
-					"dfcustomer.show()"
+					" \r\n",
+					"##Read sales data \r\n",
+					"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/sales/sales*.csv', format='csv'\r\n",
+					",header=True)\r\n",
+					"#display(dfcustomer.limit(10))"
 				],
-				"execution_count": 26
+				"execution_count": 63
 			},
 			{
 				"cell_type": "code",
@@ -153,10 +161,9 @@
 					}
 				},
 				"source": [
-					"dfcustomer.createOrReplaceTempView('customertable')\r\n",
-					""
+					"dfsales.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales.csv')"
 				],
-				"execution_count": 36
+				"execution_count": 64
 			},
 			{
 				"cell_type": "code",
@@ -169,17 +176,13 @@
 						"transient": {
 							"deleting": false
 						}
-					},
-					"microsoft": {
-						"language": "sparksql"
 					},
 					"collapsed": false
 				},
 				"source": [
-					"%%sql\r\n",
-					"select * from customertable"
+					""
 				],
-				"execution_count": 39
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -192,16 +195,12 @@
 						"transient": {
 							"deleting": false
 						}
-					},
-					"microsoft": {
-						"language": "sparksql"
 					}
 				},
 				"source": [
-					"%%sql\r\n",
-					"dff = spark.sql('select * from customertable')"
+					""
 				],
-				"execution_count": 41
+				"execution_count": null
 			}
 		]
 	}
