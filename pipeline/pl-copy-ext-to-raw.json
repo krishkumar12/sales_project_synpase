@@ -16,14 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"notebook": {
-						"referenceName": "nbk_ext_to_raw",
+						"referenceName": "nbk_copy_ext_to_raw",
 						"type": "NotebookReference"
 					},
 					"snapshot": true,
-					"sparkPool": {
-						"referenceName": "sparkpool1",
-						"type": "BigDataPoolReference"
-					},
 					"executorSize": "Small",
 					"conf": {
 						"spark.dynamicAllocation.minExecutors": 1,
