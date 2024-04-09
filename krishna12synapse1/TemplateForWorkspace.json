@@ -22,6 +22,15 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/sparkpool1')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/pl-copy-ext-to-raw')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -170,6 +179,156 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/pl-raw-to-curated')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "nbk-raw-curated",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "nbk_raw_to_curated_silver",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool1",
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {
+								"spark.dynamicAllocation.minExecutors": 1,
+								"spark.dynamicAllocation.maxExecutors": 1
+							},
+							"driverSize": "Small",
+							"numExecutors": 1
+						}
+					},
+					{
+						"name": "delete staging customer data",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "nbk-raw-curated",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "dsrawcustomer",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "delete staging product",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "delete staging customer data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "dsrawproduct",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "delete staging sales",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "delete staging product",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "dsrawsales",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/notebooks/nbk_raw_to_curated_silver')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool1')]",
+				"[concat(variables('workspaceId'), '/datasets/dsrawcustomer')]",
+				"[concat(variables('workspaceId'), '/datasets/dsrawproduct')]",
+				"[concat(variables('workspaceId'), '/datasets/dsrawsales')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/deletecustomerext')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -232,6 +391,78 @@
 						"type": "AzureBlobFSLocation",
 						"fileName": "sale*.csv",
 						"folderPath": "data-ext-landing/sales",
+						"fileSystem": "synapsecontainer1"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/krishna12synapse1-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dsrawcustomer')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "customer*.parquet",
+						"folderPath": "data-raw-bronze/staging/customer",
+						"fileSystem": "synapsecontainer1"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/krishna12synapse1-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dsrawproduct')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "product*.parquet",
+						"folderPath": "data-raw-bronze/staging/product",
+						"fileSystem": "synapsecontainer1"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/krishna12synapse1-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dsrawsales')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "sale*.parquet",
+						"folderPath": "data-raw-bronze/staging/sales",
 						"fileSystem": "synapsecontainer1"
 					}
 				}
@@ -547,12 +778,12 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/nbk_raw_to_curated_silver')]",
+			"name": "[concat(parameters('workspaceName'), '/nbk_curated_to_gold')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"folder": {
-					"name": "pl-raw-to-curated"
+					"name": "pl-curated-to-gold"
 				},
 				"nbformat": 4,
 				"nbformat_minor": 2,
@@ -570,7 +801,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "c525a2e1-c0e7-4a85-83ca-f94592d337ea"
+						"spark.autotune.trackingId": "43d294a9-f28b-4797-9a0b-e3f0ed1b7db4"
 					}
 				},
 				"metadata": {
@@ -597,6 +828,154 @@
 						"cores": 4,
 						"memory": 28,
 						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, DecimalType\r\n",
+							"##Read customer data \r\n",
+							"customerschema = StructType([\r\n",
+							"   StructField(\"custid\", IntegerType(), True),\r\n",
+							"   StructField(\"firstname\", StringType(), True),\r\n",
+							"   StructField(\"lastname\", StringType(), True),\r\n",
+							"   StructField(\"gender\", StringType(), True)])\r\n",
+							"\r\n",
+							"#customerschema= ['custid','firstname','lastname','gender']\r\n",
+							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
+							"        ,format='parquet'\r\n",
+							"        ,schema=customerschema\r\n",
+							"        #,header=True\r\n",
+							"        )\r\n",
+							"dfcustomer.show()"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"##Read product data \r\n",
+							"productschema = StructType([\r\n",
+							"   StructField(\"productid\", IntegerType(), True),\r\n",
+							"   StructField(\"productname\", StringType(), True),\r\n",
+							"   StructField(\"productcategory\", StringType(), True)])\r\n",
+							"\r\n",
+							"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products*.csv'\r\n",
+							"        ,format='parquet'\r\n",
+							"        ,schema=productschema\r\n",
+							"        ,header=True)\r\n",
+							"display(dfproduct.limit(5))\r\n",
+							"\r\n",
+							"dfproduct.show()"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"##Read sales data \r\n",
+							"salesschema = StructType([\r\n",
+							"   StructField(\"salesid\", IntegerType(), True),\r\n",
+							"   StructField(\"custid\", IntegerType(), True),\r\n",
+							"   StructField(\"productid\", IntegerType(), True),\r\n",
+							"      StructField(\"quantity\", IntegerType(), True),\r\n",
+							"   StructField(\"saledate\", DateType(), True),\r\n",
+							"      StructField(\"revenue\", DecimalType(), True)])\r\n",
+							"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales*.csv'\r\n",
+							"        ,format='parquet'\r\n",
+							"        ,schema=salesschema\r\n",
+							"        )\r\n",
+							"display(dfsales.limit(5))"
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/nbk_raw_to_curated_silver')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "pl-raw-to-curated"
+				},
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "sparkpool1",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "d958640b-f1e5-4f33-9cfe-20780f14fd22"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool1",
+						"name": "sparkpool1",
+						"type": "Spark",
+						"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -842,231 +1221,25 @@
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.4",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
 				"annotations": []
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/pl-raw-to-curated')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"activities": [
-					{
-						"name": "nbk-raw-curated",
-						"type": "SynapseNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebook": {
-								"referenceName": "nbk_raw_to_curated_silver",
-								"type": "NotebookReference"
-							},
-							"snapshot": true,
-							"sparkPool": {
-								"referenceName": "sparkpool1",
-								"type": "BigDataPoolReference"
-							},
-							"executorSize": "Small",
-							"conf": {
-								"spark.dynamicAllocation.minExecutors": 1,
-								"spark.dynamicAllocation.maxExecutors": 1
-							},
-							"driverSize": "Small",
-							"numExecutors": 1
-						}
-					},
-					{
-						"name": "delete staging customer data",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "nbk-raw-curated",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "dsrawcustomer",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							}
-						}
-					},
-					{
-						"name": "delete staging product",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "delete staging customer data",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "dsrawproduct",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							}
-						}
-					},
-					{
-						"name": "delete staging sales",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "delete staging product",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "dsrawsales",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/notebooks/nbk_raw_to_curated_silver')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool1')]",
-				"[concat(variables('workspaceId'), '/datasets/dsrawcustomer')]",
-				"[concat(variables('workspaceId'), '/datasets/dsrawproduct')]",
-				"[concat(variables('workspaceId'), '/datasets/dsrawsales')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/dsrawcustomer')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "customer*.csv",
-						"folderPath": "data-raw-bronze/staging/customer",
-						"fileSystem": "synapsecontainer1"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/krishna12synapse1-WorkspaceDefaultStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/dsrawproduct')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "product*.csv",
-						"folderPath": "data-raw-bronze/staging/product",
-						"fileSystem": "synapsecontainer1"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/krishna12synapse1-WorkspaceDefaultStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/dsrawsales')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "sale*.csv",
-						"folderPath": "data-raw-bronze/staging/sales",
-						"fileSystem": "synapsecontainer1"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/krishna12synapse1-WorkspaceDefaultStorage')]"
-			]
+			"dependsOn": [],
+			"location": "eastus"
 		}
 	]
 }
