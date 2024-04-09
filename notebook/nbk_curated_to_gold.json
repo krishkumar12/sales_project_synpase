@@ -16,7 +16,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "0bb784b8-8088-468a-a287-d6c3739f354c"
+				"spark.autotune.trackingId": "27e38686-ea54-42ce-9999-a9bdbad4d419"
 			}
 		},
 		"metadata": {
@@ -51,7 +51,7 @@
 					"\r\n",
 					"#customerschema= ['custid','firstname','lastname','gender']\r\n",
 					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
-					"        ,format='csv'\r\n",
+					"        ,format='parquet'\r\n",
 					"        ,schema=customerschema\r\n",
 					"        #,header=True\r\n",
 					"        )\r\n",
@@ -80,7 +80,7 @@
 					"   StructField(\"productcategory\", StringType(), True)])\r\n",
 					"\r\n",
 					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products*.csv'\r\n",
-					"        ,format='csv'\r\n",
+					"        ,format='parquet'\r\n",
 					"        ,schema=productschema\r\n",
 					"        ,header=True)\r\n",
 					"display(dfproduct.limit(5))\r\n",
@@ -112,7 +112,7 @@
 					"   StructField(\"saledate\", DateType(), True),\r\n",
 					"      StructField(\"revenue\", DecimalType(), True)])\r\n",
 					"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales*.csv'\r\n",
-					"        ,format='csv'\r\n",
+					"        ,format='parquet'\r\n",
 					"        ,schema=salesschema\r\n",
 					"        )\r\n",
 					"display(dfsales.limit(5))"

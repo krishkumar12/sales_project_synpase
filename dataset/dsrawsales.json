@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "sale*.csv",
+				"fileName": "sale*.parquet",
 				"folderPath": "data-raw-bronze/staging/sales",
 				"fileSystem": "synapsecontainer1"
 			}
