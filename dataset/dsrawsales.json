@@ -1,0 +1,19 @@
+{
+	"name": "dsrawsales",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "krishna12synapse1-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "sale*.csv",
+				"folderPath": "data-raw-bronze/staging/sales",
+				"fileSystem": "synapsecontainer1"
+			}
+		}
+	}
+}

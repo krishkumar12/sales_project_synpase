@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "91f5b82c-8c35-40be-b8e4-6a01f50ca86b"
+				"spark.autotune.trackingId": "d958640b-f1e5-4f33-9cfe-20780f14fd22"
 			}
 		},
 		"metadata": {
@@ -42,7 +42,7 @@
 					"type": "AAD",
 					"authResource": "https://dev.azuresynapse.net"
 				},
-				"sparkVersion": "3.3",
+				"sparkVersion": "3.4",
 				"nodeCount": 10,
 				"cores": 4,
 				"memory": 28,
@@ -61,8 +61,15 @@
 				},
 				"source": [
 					"%%pyspark\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, DecimalType\r\n",
 					"##Read customer data \r\n",
-					"customerschema= ['custid','firstname','lastname','gender']\r\n",
+					"customerschema = StructType([\r\n",
+					"   StructField(\"custid\", IntegerType(), True),\r\n",
+					"   StructField(\"firstname\", StringType(), True),\r\n",
+					"   StructField(\"lastname\", StringType(), True),\r\n",
+					"   StructField(\"gender\", StringType(), True)])\r\n",
+					"\r\n",
+					"#customerschema= ['custid','firstname','lastname','gender']\r\n",
 					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
 					"        ,format='csv'\r\n",
 					"        ,schema=customerschema\r\n",
@@ -70,7 +77,71 @@
 					"        )\r\n",
 					"dfcustomer.show()"
 				],
-				"execution_count": 12
+				"execution_count": 65
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfcustomer.count()"
+				],
+				"execution_count": 66
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#step 1 : Remove duplicate custid\r\n",
+					"#step 2 : fill unknown to gender column if null\r\n",
+					"#step 3 : drop row if custid is null\r\n",
+					"#step 4 : write to curated container as parquet format\r\n",
+					"dfcustomercurated = dfcustomer.drop_duplicates(['custid'])\r\n",
+					"dfcustomercurated = dfcustomercurated.na.fill({'gender':'Unknown'})\r\n",
+					"dfcustomercurated = dfcustomercurated.na.fill({'firstname':'Unknown'})\r\n",
+					"dfcustomercurated = dfcustomercurated.na.fill({'lastname':'Unknown'})\r\n",
+					"dfcustomercurated = dfcustomercurated.na.drop()\r\n",
+					"dfcustomercurated.show()\r\n",
+					"dfcustomercurated.write.parquet('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/customer/customer',mode='overwrite')"
+				],
+				"execution_count": 67
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -88,12 +159,47 @@
 				},
 				"source": [
 					"##Read product data \r\n",
-					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products.csv'\r\n",
+					"productschema = StructType([\r\n",
+					"   StructField(\"productid\", IntegerType(), True),\r\n",
+					"   StructField(\"productname\", StringType(), True),\r\n",
+					"   StructField(\"productcategory\", StringType(), True)])\r\n",
+					"\r\n",
+					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products*.csv'\r\n",
 					"        ,format='csv'\r\n",
+					"        ,schema=productschema\r\n",
 					"        ,header=True)\r\n",
-					"display(dfproduct.limit(5))"
+					"display(dfproduct.limit(5))\r\n",
+					"\r\n",
+					"dfproduct.show()"
 				],
-				"execution_count": 2
+				"execution_count": 68
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#step 1 : Remove duplicate productid\r\n",
+					"#step 2 : fill unknown to productname, productcategory column if null\r\n",
+					"#step 3 : drop row if product is null\r\n",
+					"#step 4 : write to curated container as parquet format\r\n",
+					"dfproductcurated = dfproduct.drop_duplicates(['productid'])\r\n",
+					"dfproductcurated = dfproductcurated.na.fill({'productname':'Unknown'})\r\n",
+					"dfproductcurated = dfproductcurated.na.fill({'productcategory':'Unknown'})\r\n",
+					"dfproductcurated = dfproductcurated.na.drop()\r\n",
+					"dfproductcurated.show()\r\n",
+					"dfproductcurated.write.parquet('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/product/product',mode='overwrite')"
+				],
+				"execution_count": 69
 			},
 			{
 				"cell_type": "code",
@@ -111,12 +217,20 @@
 				},
 				"source": [
 					"##Read sales data \r\n",
+					"salesschema = StructType([\r\n",
+					"   StructField(\"salesid\", IntegerType(), True),\r\n",
+					"   StructField(\"custid\", IntegerType(), True),\r\n",
+					"   StructField(\"productid\", IntegerType(), True),\r\n",
+					"      StructField(\"quantity\", IntegerType(), True),\r\n",
+					"   StructField(\"saledate\", DateType(), True),\r\n",
+					"      StructField(\"revenue\", DecimalType(), True)])\r\n",
 					"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales*.csv'\r\n",
 					"        ,format='csv'\r\n",
-					"        ,header=True)\r\n",
+					"        ,schema=salesschema\r\n",
+					"        )\r\n",
 					"display(dfsales.limit(5))"
 				],
-				"execution_count": 3
+				"execution_count": 70
 			},
 			{
 				"cell_type": "code",
@@ -132,12 +246,15 @@
 					}
 				},
 				"source": [
-					"#drop duplicates\r\n",
-					"dfcustomer = dfcustomer.drop_duplicates(dfcustomer.)\r\n",
-					"dfproduct  = dfproduct.drop_duplicates()\r\n",
-					"dfsales    = dfsales.drop_duplicates()"
+					"#step 1 : Remove duplicate saleid\r\n",
+					"#step 2 : drop if any column is null \r\n",
+					"#step 4 : write to curated container as parquet format\r\n",
+					"dfsalescurated = dfsales.drop_duplicates(['salesid'])\r\n",
+					"dfsalescurated = dfsalescurated.dropna().sort(['salesid','custid','productid'])\r\n",
+					"dfsalescurated.show()\r\n",
+					"dfsalescurated.write.parquet('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/sales/sales',mode='overwrite')"
 				],
-				"execution_count": 4
+				"execution_count": 71
 			},
 			{
 				"cell_type": "code",
@@ -153,9 +270,9 @@
 					}
 				},
 				"source": [
-					"dfcustomer.na.fill({'age': 50, 'name': 'unknown'}).show()"
+					" "
 				],
-				"execution_count": null
+				"execution_count": 72
 			}
 		]
 	}
