@@ -16,7 +16,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "312312ed-e3ab-48b6-95b1-f11c8d274b85"
+				"spark.autotune.trackingId": "0bb784b8-8088-468a-a287-d6c3739f354c"
 			}
 		},
 		"metadata": {
@@ -34,8 +34,88 @@
 		"cells": [
 			{
 				"cell_type": "code",
+				"metadata": {
+					"microsoft": {
+						"language": "python"
+					}
+				},
 				"source": [
-					""
+					"%%pyspark\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, DecimalType\r\n",
+					"##Read customer data \r\n",
+					"customerschema = StructType([\r\n",
+					"   StructField(\"custid\", IntegerType(), True),\r\n",
+					"   StructField(\"firstname\", StringType(), True),\r\n",
+					"   StructField(\"lastname\", StringType(), True),\r\n",
+					"   StructField(\"gender\", StringType(), True)])\r\n",
+					"\r\n",
+					"#customerschema= ['custid','firstname','lastname','gender']\r\n",
+					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
+					"        ,format='csv'\r\n",
+					"        ,schema=customerschema\r\n",
+					"        #,header=True\r\n",
+					"        )\r\n",
+					"dfcustomer.show()"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"##Read product data \r\n",
+					"productschema = StructType([\r\n",
+					"   StructField(\"productid\", IntegerType(), True),\r\n",
+					"   StructField(\"productname\", StringType(), True),\r\n",
+					"   StructField(\"productcategory\", StringType(), True)])\r\n",
+					"\r\n",
+					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products*.csv'\r\n",
+					"        ,format='csv'\r\n",
+					"        ,schema=productschema\r\n",
+					"        ,header=True)\r\n",
+					"display(dfproduct.limit(5))\r\n",
+					"\r\n",
+					"dfproduct.show()"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"##Read sales data \r\n",
+					"salesschema = StructType([\r\n",
+					"   StructField(\"salesid\", IntegerType(), True),\r\n",
+					"   StructField(\"custid\", IntegerType(), True),\r\n",
+					"   StructField(\"productid\", IntegerType(), True),\r\n",
+					"      StructField(\"quantity\", IntegerType(), True),\r\n",
+					"   StructField(\"saledate\", DateType(), True),\r\n",
+					"      StructField(\"revenue\", DecimalType(), True)])\r\n",
+					"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales*.csv'\r\n",
+					"        ,format='csv'\r\n",
+					"        ,schema=salesschema\r\n",
+					"        )\r\n",
+					"display(dfsales.limit(5))"
 				],
 				"execution_count": null
 			}
