@@ -22,7 +22,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/sparkpool1')]",
+			"name": "[concat(parameters('workspaceName'), '/sparkpool111')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -202,10 +202,6 @@
 								"type": "NotebookReference"
 							},
 							"snapshot": true,
-							"sparkPool": {
-								"referenceName": "sparkpool1",
-								"type": "BigDataPoolReference"
-							},
 							"executorSize": "Small",
 							"conf": {
 								"spark.dynamicAllocation.minExecutors": 1,
@@ -322,7 +318,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/notebooks/nbk_raw_to_curated_silver')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool1')]",
 				"[concat(variables('workspaceId'), '/datasets/dsrawcustomer')]",
 				"[concat(variables('workspaceId'), '/datasets/dsrawproduct')]",
 				"[concat(variables('workspaceId'), '/datasets/dsrawsales')]"
@@ -413,7 +408,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "customer*.parquet",
+						"fileName": "customer*.csv",
 						"folderPath": "data-raw-bronze/staging/customer",
 						"fileSystem": "synapsecontainer1"
 					}
@@ -437,7 +432,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "product*.parquet",
+						"fileName": "product*.csv",
 						"folderPath": "data-raw-bronze/staging/product",
 						"fileSystem": "synapsecontainer1"
 					}
@@ -461,7 +456,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "sale*.parquet",
+						"fileName": "sale*.csv",
 						"folderPath": "data-raw-bronze/staging/sales",
 						"fileSystem": "synapsecontainer1"
 					}
@@ -801,7 +796,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "43d294a9-f28b-4797-9a0b-e3f0ed1b7db4"
+						"spark.autotune.trackingId": "cb325940-eb08-4414-9db1-441bc01702de"
 					}
 				},
 				"metadata": {
@@ -826,8 +821,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -937,7 +931,7 @@
 				"nbformat": 4,
 				"nbformat_minor": 2,
 				"bigDataPool": {
-					"referenceName": "sparkpool1",
+					"referenceName": "sparkpool111",
 					"type": "BigDataPoolReference"
 				},
 				"sessionProperties": {
@@ -950,7 +944,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d958640b-f1e5-4f33-9cfe-20780f14fd22"
+						"spark.autotune.trackingId": "36c24fb3-0602-4538-96aa-a820ef11e568"
 					}
 				},
 				"metadata": {
@@ -964,10 +958,10 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool1",
-						"name": "sparkpool1",
+						"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool111",
+						"name": "sparkpool111",
 						"type": "Spark",
-						"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+						"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool111",
 						"auth": {
 							"type": "AAD",
 							"authResource": "https://dev.azuresynapse.net"
@@ -1007,7 +1001,7 @@
 							"dfcustomer.show()"
 						],
 						"outputs": [],
-						"execution_count": 65
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
@@ -1217,7 +1211,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/sparkpool1')]",
+			"name": "[concat(parameters('workspaceName'), '/sparkpool111')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -1227,7 +1221,7 @@
 				},
 				"autoScale": {
 					"enabled": true,
-					"maxNodeCount": 3,
+					"maxNodeCount": 5,
 					"minNodeCount": 3
 				},
 				"nodeCount": 10,
