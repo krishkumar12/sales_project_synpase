@@ -212,7 +212,7 @@
 						}
 					},
 					{
-						"name": "delete staging customer data",
+						"name": "delete staging customer data1",
 						"type": "Delete",
 						"dependsOn": [
 							{
@@ -249,7 +249,7 @@
 						"type": "Delete",
 						"dependsOn": [
 							{
-								"activity": "delete staging customer data",
+								"activity": "delete staging customer data1",
 								"dependencyConditions": [
 									"Succeeded"
 								]
