@@ -22,15 +22,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/sparkpool111')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/pl-copy-ext-to-raw')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -783,7 +774,7 @@
 				"nbformat": 4,
 				"nbformat_minor": 2,
 				"bigDataPool": {
-					"referenceName": "sparkpool1",
+					"referenceName": "sparkpool111",
 					"type": "BigDataPoolReference"
 				},
 				"sessionProperties": {
@@ -796,7 +787,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "cb325940-eb08-4414-9db1-441bc01702de"
+						"spark.autotune.trackingId": "ced93e4c-cef3-415b-89bf-3fcf1acd3dd4"
 					}
 				},
 				"metadata": {
@@ -810,10 +801,10 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool1",
-						"name": "sparkpool1",
+						"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool111",
+						"name": "sparkpool111",
 						"type": "Spark",
-						"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+						"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool111",
 						"auth": {
 							"type": "AAD",
 							"authResource": "https://dev.azuresynapse.net"
@@ -821,7 +812,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -844,7 +836,7 @@
 							"   StructField(\"gender\", StringType(), True)])\r\n",
 							"\r\n",
 							"#customerschema= ['custid','firstname','lastname','gender']\r\n",
-							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
+							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/customer/customer*'\r\n",
 							"        ,format='parquet'\r\n",
 							"        ,schema=customerschema\r\n",
 							"        #,header=True\r\n",
@@ -852,7 +844,7 @@
 							"dfcustomer.show()"
 						],
 						"outputs": [],
-						"execution_count": 1
+						"execution_count": 57
 					},
 					{
 						"cell_type": "code",
@@ -865,7 +857,8 @@
 								"transient": {
 									"deleting": false
 								}
-							}
+							},
+							"collapsed": false
 						},
 						"source": [
 							"##Read product data \r\n",
@@ -874,7 +867,7 @@
 							"   StructField(\"productname\", StringType(), True),\r\n",
 							"   StructField(\"productcategory\", StringType(), True)])\r\n",
 							"\r\n",
-							"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products*.csv'\r\n",
+							"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/product/product*'\r\n",
 							"        ,format='parquet'\r\n",
 							"        ,schema=productschema\r\n",
 							"        ,header=True)\r\n",
@@ -883,7 +876,7 @@
 							"dfproduct.show()"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 58
 					},
 					{
 						"cell_type": "code",
@@ -896,7 +889,8 @@
 								"transient": {
 									"deleting": false
 								}
-							}
+							},
+							"collapsed": false
 						},
 						"source": [
 							"##Read sales data \r\n",
@@ -907,14 +901,65 @@
 							"      StructField(\"quantity\", IntegerType(), True),\r\n",
 							"   StructField(\"saledate\", DateType(), True),\r\n",
 							"      StructField(\"revenue\", DecimalType(), True)])\r\n",
-							"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales*.csv'\r\n",
+							"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/sales/sales*'\r\n",
 							"        ,format='parquet'\r\n",
 							"        ,schema=salesschema\r\n",
 							"        )\r\n",
 							"display(dfsales.limit(5))"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 59
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"# create fast moving product\r\n",
+							"\r\n",
+							"dffastmovingproduct = dfsales.join(dfproduct,'productid').groupBy('productid').sum('quantity')\\\r\n",
+							"                        .sort('sum(quantity)',ascending=False)\r\n",
+							"\r\n",
+							"#dffastmovingproduct = dffastmovingproduct.sort('sum(quantity)',ascending=False)\r\n",
+							"dffastmovingproduct.show()\r\n",
+							"dffastmovingproduct.write.parquet('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-processed-gold/fast-moving-product/',mode='overwrite')"
+						],
+						"outputs": [],
+						"execution_count": 60
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"# create fast moving product\r\n",
+							"\r\n",
+							"dfsalesperday = dfsales.groupby('saledate').sum('revenue') \\\r\n",
+							"                .sort('sum(revenue)',ascending=False)\r\n",
+							"dfsalesperday.show()\r\n",
+							"dfsalesperday.write.parquet('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-processed-gold/total-sales-per-day/',mode='overwrite')"
+						],
+						"outputs": [],
+						"execution_count": 61
 					}
 				]
 			},
@@ -944,7 +989,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "02530d43-20b7-41e2-86f2-7b4460dd3e5e"
+						"spark.autotune.trackingId": "10d1ec1a-abbb-49da-9819-5ad427df83ea"
 					}
 				},
 				"metadata": {
@@ -969,7 +1014,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
