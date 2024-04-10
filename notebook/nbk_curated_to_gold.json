@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "cb325940-eb08-4414-9db1-441bc01702de"
+				"spark.autotune.trackingId": "4840c6a7-58fc-4be3-8326-9ebf4fbb0898"
 			}
 		},
 		"metadata": {
@@ -36,17 +36,10 @@
 			"a365ComputeOptions": {
 				"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool1",
 				"name": "sparkpool1",
-				"type": "Spark",
-				"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
 				"auth": {
 					"type": "AAD",
 					"authResource": "https://dev.azuresynapse.net"
-				},
-				"sparkVersion": "3.4",
-				"nodeCount": 10,
-				"cores": 4,
-				"memory": 28,
-				"automaticScaleJobs": false
+				}
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -69,7 +62,7 @@
 					"   StructField(\"gender\", StringType(), True)])\r\n",
 					"\r\n",
 					"#customerschema= ['custid','firstname','lastname','gender']\r\n",
-					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
+					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/customer/customer*'\r\n",
 					"        ,format='parquet'\r\n",
 					"        ,schema=customerschema\r\n",
 					"        #,header=True\r\n",
@@ -98,7 +91,7 @@
 					"   StructField(\"productname\", StringType(), True),\r\n",
 					"   StructField(\"productcategory\", StringType(), True)])\r\n",
 					"\r\n",
-					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products*.csv'\r\n",
+					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/product/products*'\r\n",
 					"        ,format='parquet'\r\n",
 					"        ,schema=productschema\r\n",
 					"        ,header=True)\r\n",
@@ -130,7 +123,7 @@
 					"      StructField(\"quantity\", IntegerType(), True),\r\n",
 					"   StructField(\"saledate\", DateType(), True),\r\n",
 					"      StructField(\"revenue\", DecimalType(), True)])\r\n",
-					"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales*.csv'\r\n",
+					"dfsales = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-curated-silver/sales/sales*'\r\n",
 					"        ,format='parquet'\r\n",
 					"        ,schema=salesschema\r\n",
 					"        )\r\n",
