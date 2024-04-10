@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "02530d43-20b7-41e2-86f2-7b4460dd3e5e"
+				"spark.autotune.trackingId": "5d561c01-285d-4fd7-9134-76dd9f20d89d"
 			}
 		},
 		"metadata": {
@@ -70,7 +70,7 @@
 					"   StructField(\"gender\", StringType(), True)])\r\n",
 					"\r\n",
 					"#customerschema= ['custid','firstname','lastname','gender']\r\n",
-					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
+					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers*.csv'\r\n",
 					"        ,format='csv'\r\n",
 					"        ,schema=customerschema\r\n",
 					"        #,header=True\r\n",
