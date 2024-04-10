@@ -22,154 +22,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/pl-copy-ext-to-raw')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"activities": [
-					{
-						"name": "exttoraw",
-						"type": "SynapseNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebook": {
-								"referenceName": "nbk_copy_ext_to_raw",
-								"type": "NotebookReference"
-							},
-							"snapshot": true,
-							"executorSize": "Small",
-							"conf": {
-								"spark.dynamicAllocation.minExecutors": 1,
-								"spark.dynamicAllocation.maxExecutors": 1
-							},
-							"driverSize": "Small",
-							"numExecutors": 1
-						}
-					},
-					{
-						"name": "deletecustomerext",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "exttoraw",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "deletecustomerext",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"wildcardFileName": "customer*csv",
-								"enablePartitionDiscovery": false
-							}
-						}
-					},
-					{
-						"name": "deleteproductext",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "deletecustomerext",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "deleteproductext",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"wildcardFileName": "product*.csv",
-								"enablePartitionDiscovery": false
-							}
-						}
-					},
-					{
-						"name": "deletesalesext",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "deleteproductext",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "deletesalesext",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"enableLogging": false,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"wildcardFileName": "sale*.csv",
-								"enablePartitionDiscovery": false
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/notebooks/nbk_copy_ext_to_raw')]",
-				"[concat(variables('workspaceId'), '/datasets/deletecustomerext')]",
-				"[concat(variables('workspaceId'), '/datasets/deleteproductext')]",
-				"[concat(variables('workspaceId'), '/datasets/deletesalesext')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/pl-curated-to-gold')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -216,6 +68,80 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/notebooks/nbk_curated_to_gold')]",
 				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool111')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pl-raw-curated-gold')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline1",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl-ext-to-raw",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": false,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline1_copy1",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl-raw-to-curated",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": false,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline1_copy1_copy1",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline1_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl-curated-to-gold",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": false,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/pl-ext-to-raw')]",
+				"[concat(variables('workspaceId'), '/pipelines/pl-raw-to-curated')]",
+				"[concat(variables('workspaceId'), '/pipelines/pl-curated-to-gold')]"
 			]
 		},
 		{
@@ -622,7 +548,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "6d13af80-1b57-4226-b6e0-7a40207348cd"
+						"spark.autotune.trackingId": "f2b45828-9b04-4b55-893c-68d7af9d33b2"
 					}
 				},
 				"metadata": {
@@ -647,8 +573,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -843,7 +768,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "5f211031-cbf6-4667-be01-a41d41873b90"
+						"spark.autotune.trackingId": "240bc9b5-13ec-4e5a-a09e-f3f2042db153"
 					}
 				},
 				"metadata": {
@@ -868,8 +793,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -1045,7 +969,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d9899240-90ab-4443-9825-530bd54a7f12"
+						"spark.autotune.trackingId": "5d561c01-285d-4fd7-9134-76dd9f20d89d"
 					}
 				},
 				"metadata": {
@@ -1070,8 +994,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -1338,13 +1261,13 @@
 			"location": "eastus"
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/pl-ext-to-gold')]",
+			"name": "[concat(parameters('workspaceName'), '/pl-ext-to-raw')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"activities": [
 					{
-						"name": "Notebook1",
+						"name": "plcopyexttoraw",
 						"type": "SynapseNotebook",
 						"dependsOn": [],
 						"policy": {
@@ -1365,72 +1288,6 @@
 								"referenceName": "sparkpool111",
 								"type": "BigDataPoolReference"
 							},
-							"conf": {}
-						}
-					},
-					{
-						"name": "Notebook2",
-						"type": "SynapseNotebook",
-						"dependsOn": [
-							{
-								"activity": "Notebook1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebook": {
-								"referenceName": "nbk_raw_to_curated_silver",
-								"type": "NotebookReference"
-							},
-							"snapshot": true,
-							"sparkPool": {
-								"referenceName": "sparkpool111",
-								"type": "BigDataPoolReference"
-							},
-							"executorSize": "Small",
-							"conf": {},
-							"driverSize": "Small"
-						}
-					},
-					{
-						"name": "Notebook3",
-						"type": "SynapseNotebook",
-						"dependsOn": [
-							{
-								"activity": "Notebook2",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebook": {
-								"referenceName": "nbk_curated_to_gold",
-								"type": "NotebookReference"
-							},
-							"snapshot": true,
-							"sparkPool": {
-								"referenceName": "sparkpool111",
-								"type": "BigDataPoolReference"
-							},
 							"executorSize": "Small",
 							"conf": {},
 							"driverSize": "Small"
@@ -1444,9 +1301,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/notebooks/nbk_copy_ext_to_raw')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool111')]",
-				"[concat(variables('workspaceId'), '/notebooks/nbk_raw_to_curated_silver')]",
-				"[concat(variables('workspaceId'), '/notebooks/nbk_curated_to_gold')]"
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool111')]"
 			]
 		}
 	]
