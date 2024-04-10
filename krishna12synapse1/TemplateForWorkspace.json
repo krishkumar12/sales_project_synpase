@@ -170,6 +170,55 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/pl-curated-to-gold')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "nbkcuratedtogold",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "nbk_curated_to_gold",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool111",
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"driverSize": "Small",
+							"numExecutors": null
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/notebooks/nbk_curated_to_gold')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool111')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/pl-raw-to-curated')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -560,7 +609,7 @@
 				"nbformat": 4,
 				"nbformat_minor": 2,
 				"bigDataPool": {
-					"referenceName": "sparkpool1",
+					"referenceName": "sparkpool111",
 					"type": "BigDataPoolReference"
 				},
 				"sessionProperties": {
@@ -573,7 +622,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d5c828cf-c9e6-4cee-bb5b-4e93613471b5"
+						"spark.autotune.trackingId": "6d13af80-1b57-4226-b6e0-7a40207348cd"
 					}
 				},
 				"metadata": {
@@ -587,12 +636,19 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "subscriptions/*/resourceGroups/*/providers/Microsoft.Synapse/workspaces/*/bigDataPools/sparkpool1",
-						"name": "sparkpool1",
+						"id": "/subscriptions/f6293421-863c-4786-92ba-57aa9850c58d/resourceGroups/rg1/providers/Microsoft.Synapse/workspaces/krishna12synapse1/bigDataPools/sparkpool111",
+						"name": "sparkpool111",
+						"type": "Spark",
+						"endpoint": "https://krishna12synapse1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool111",
 						"auth": {
 							"type": "AAD",
 							"authResource": "https://dev.azuresynapse.net"
-						}
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -608,14 +664,14 @@
 						"source": [
 							"%%pyspark\r\n",
 							"##Read customer data \r\n",
-							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/customer/customers.csv', format='csv'\r\n",
+							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/customer/customers*.csv', format='csv'\r\n",
 							"## If header exists uncomment line below\r\n",
 							"##, header=True\r\n",
 							",header=True)\r\n",
 							"#display(dfcustomer.limit(10))"
 						],
 						"outputs": [],
-						"execution_count": 59
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
@@ -634,7 +690,7 @@
 							"dfcustomer.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv',mode='overwrite')"
 						],
 						"outputs": [],
-						"execution_count": 60
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
@@ -652,12 +708,12 @@
 						"source": [
 							" \r\n",
 							"##Read product  data \r\n",
-							"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/product/products.csv', format='csv'\r\n",
+							"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/product/products*.csv', format='csv'\r\n",
 							",header=True)\r\n",
 							"#display(dfcustomer.limit(10))"
 						],
 						"outputs": [],
-						"execution_count": 61
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
@@ -676,7 +732,7 @@
 							"dfproduct.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/product/products.csv',mode='overwrite')"
 						],
 						"outputs": [],
-						"execution_count": 62
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
@@ -699,7 +755,7 @@
 							"#display(dfcustomer.limit(10))"
 						],
 						"outputs": [],
-						"execution_count": 63
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
@@ -718,7 +774,7 @@
 							"dfsales.write.csv('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/sales/sales.csv',mode='overwrite')"
 						],
 						"outputs": [],
-						"execution_count": 64
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
@@ -787,7 +843,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "ced93e4c-cef3-415b-89bf-3fcf1acd3dd4"
+						"spark.autotune.trackingId": "5f211031-cbf6-4667-be01-a41d41873b90"
 					}
 				},
 				"metadata": {
@@ -989,7 +1045,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "10d1ec1a-abbb-49da-9819-5ad427df83ea"
+						"spark.autotune.trackingId": "d9899240-90ab-4443-9825-530bd54a7f12"
 					}
 				},
 				"metadata": {
@@ -1039,7 +1095,7 @@
 							"   StructField(\"gender\", StringType(), True)])\r\n",
 							"\r\n",
 							"#customerschema= ['custid','firstname','lastname','gender']\r\n",
-							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers.csv'\r\n",
+							"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-raw-bronze/staging/customer/customers*.csv'\r\n",
 							"        ,format='csv'\r\n",
 							"        ,schema=customerschema\r\n",
 							"        #,header=True\r\n",
@@ -1280,6 +1336,118 @@
 			},
 			"dependsOn": [],
 			"location": "eastus"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pl-ext-to-gold')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Notebook1",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "nbk_copy_ext_to_raw",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool111",
+								"type": "BigDataPoolReference"
+							},
+							"conf": {}
+						}
+					},
+					{
+						"name": "Notebook2",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "Notebook1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "nbk_raw_to_curated_silver",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool111",
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {},
+							"driverSize": "Small"
+						}
+					},
+					{
+						"name": "Notebook3",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "Notebook2",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "nbk_curated_to_gold",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool111",
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {},
+							"driverSize": "Small"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/notebooks/nbk_copy_ext_to_raw')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool111')]",
+				"[concat(variables('workspaceId'), '/notebooks/nbk_raw_to_curated_silver')]",
+				"[concat(variables('workspaceId'), '/notebooks/nbk_curated_to_gold')]"
+			]
 		}
 	]
 }
