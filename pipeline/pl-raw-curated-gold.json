@@ -9,7 +9,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "pl-copy-ext-to-raw",
+						"referenceName": "pl-ext-to-raw",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": false
