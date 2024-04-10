@@ -3,56 +3,93 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "exe-pl-exttoraw",
-				"type": "ExecutePipeline",
+				"name": "Notebook1",
+				"type": "SynapseNotebook",
 				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "pl-copy-ext-to-raw",
-						"type": "PipelineReference"
+					"notebook": {
+						"referenceName": "nbk_copy_ext_to_raw",
+						"type": "NotebookReference"
 					},
-					"waitOnCompletion": false
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "sparkpool111",
+						"type": "BigDataPoolReference"
+					}
 				}
 			},
 			{
-				"name": "exe-pl-rawtocurated",
-				"type": "ExecutePipeline",
+				"name": "Notebook2",
+				"type": "SynapseNotebook",
 				"dependsOn": [
 					{
-						"activity": "exe-pl-exttoraw",
+						"activity": "Notebook1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "pl-raw-to-curated",
-						"type": "PipelineReference"
+					"notebook": {
+						"referenceName": "nbk_raw_to_curated_silver",
+						"type": "NotebookReference"
 					},
-					"waitOnCompletion": false
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "sparkpool111",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"driverSize": "Small"
 				}
 			},
 			{
-				"name": "exe-pl-curatedtogold",
-				"type": "ExecutePipeline",
+				"name": "Notebook3",
+				"type": "SynapseNotebook",
 				"dependsOn": [
 					{
-						"activity": "exe-pl-rawtocurated",
+						"activity": "Notebook2",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "pl-curated-to-gold",
-						"type": "PipelineReference"
+					"notebook": {
+						"referenceName": "nbk_curated_to_gold",
+						"type": "NotebookReference"
 					},
-					"waitOnCompletion": false
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "sparkpool111",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"driverSize": "Small"
 				}
 			}
 		],
