@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "404de783-2f6e-40b7-a048-100a503516d6"
+				"spark.autotune.trackingId": "f2b45828-9b04-4b55-893c-68d7af9d33b2"
 			}
 		},
 		"metadata": {
@@ -62,7 +62,7 @@
 				"source": [
 					"%%pyspark\r\n",
 					"##Read customer data \r\n",
-					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/customer/customers.csv', format='csv'\r\n",
+					"dfcustomer = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/customer/customers*.csv', format='csv'\r\n",
 					"## If header exists uncomment line below\r\n",
 					"##, header=True\r\n",
 					",header=True)\r\n",
@@ -104,7 +104,7 @@
 				"source": [
 					" \r\n",
 					"##Read product  data \r\n",
-					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/product/products.csv', format='csv'\r\n",
+					"dfproduct = spark.read.load('abfss://synapsecontainer1@synapsedlake1.dfs.core.windows.net/data-ext-landing/product/products*.csv', format='csv'\r\n",
 					",header=True)\r\n",
 					"#display(dfcustomer.limit(10))"
 				],
