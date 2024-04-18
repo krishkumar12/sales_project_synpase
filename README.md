@@ -1,14 +1,14 @@
-sales_project_adf (Azure Data Factory)
-Sample project to use ADF, ADLS Gen2 and transformed into aggregated data and stored into ADLS Gen 2.
+sales_project_adf (Azure Synapse Analytics)
+Sample project to use Azure Synapse analytics, ADLS Gen2 , notebooks with Pyspark to transform data into aggregated data and stored into ADLS Gen 2.
 
 To read three input files (Sales, Product, customer) and ingest, transform and Load by data following medallion Architecture (Bronze, Silver & Gold layers)
 
 Data flow of this project
-Step 1 : Copy the csv data from external landing container (data-ext-landing) to raw container (data-raw-bronze) - Used Copy data, delete activities
+Step 1 : Copy the csv data from external landing container (data-ext-landing) to raw container (data-raw-bronze) - Used Synapse pipeline, notebook activity & pyspark notebook
 
-Step 2 : Data from container (data-raw-bronze) are processed and pre validation like Null checks , converted the csv to parquet - Used Dataflow transformation
+Step 2 : Data from container (data-raw-bronze) are processed and pre validation like Null checks , converted the csv to parquet - Used Synapse pipeline, notebook activity & pyspark notebook
 
-Step 3 : Curated data is processed, aggregated and final datasets are created that provides busines insights like (fast moving products, total Sales per day )- Used Dataflow transformation
+Step 3 : Curated data is processed, aggregated and final datasets are created that provides busines insights like (fast moving products, total Sales per day )- Transformations are done via pyspark notebook
 
 Inputs
 Sales - Sales information of each order
@@ -31,13 +31,13 @@ Trigger types
 Scheduled trigger
 Storage event trigger
 Activities used
-Copy Data
-Dataflow
-Execute Dataflow
+
+notebook activity
 Delete Activity
 Pipeline
 Execute Pipeline
-Dataflow Transformations
+
+Transformations done using pyspark
 Aggregate Transformation
 Derived column Transformation
 Conditional Split Transformation
